@@ -3,8 +3,23 @@ import { categories, tools, type Tool, type ToolCategory } from './data/tools';
 import { filterTools, readSavedToolIds, writeSavedToolIds } from './lib/toolkit';
 import { getRouteFromHash } from './lib/toolkit-tools';
 import { Base64Encoder } from './components/tools/Base64Encoder';
+import { CaseConverter } from './components/tools/CaseConverter';
 import { ColorConverter } from './components/tools/ColorConverter';
+import { ContrastChecker } from './components/tools/ContrastChecker';
+import { DateDifference } from './components/tools/DateDifference';
+import { GradientGenerator } from './components/tools/GradientGenerator';
 import { JsonFormatter } from './components/tools/JsonFormatter';
+import { LoremIpsum } from './components/tools/LoremIpsum';
+import { MarkdownPreviewer } from './components/tools/MarkdownPreviewer';
+import { PasswordGenerator } from './components/tools/PasswordGenerator';
+import { PercentageCalculator } from './components/tools/PercentageCalculator';
+import { RegexTester } from './components/tools/RegexTester';
+import { TimestampConverter } from './components/tools/TimestampConverter';
+import { TipCalculator } from './components/tools/TipCalculator';
+import { UnitConverter } from './components/tools/UnitConverter';
+import { UrlEncoder } from './components/tools/UrlEncoder';
+import { UuidGenerator } from './components/tools/UuidGenerator';
+import { WordCounter } from './components/tools/WordCounter';
 
 type ActiveCategory = 'All' | ToolCategory;
 type SavedIds = Set<string>;
@@ -91,12 +106,72 @@ function App() {
     return <JsonFormatter />;
   }
 
+  if (route === 'tools/word-counter') {
+    return <WordCounter />;
+  }
+
+  if (route === 'tools/case-converter') {
+    return <CaseConverter />;
+  }
+
+  if (route === 'tools/markdown-previewer') {
+    return <MarkdownPreviewer />;
+  }
+
   if (route === 'tools/base64-encoder') {
     return <Base64Encoder />;
   }
 
+  if (route === 'tools/url-encoder') {
+    return <UrlEncoder />;
+  }
+
+  if (route === 'tools/timestamp-converter') {
+    return <TimestampConverter />;
+  }
+
+  if (route === 'tools/unit-converter') {
+    return <UnitConverter />;
+  }
+
+  if (route === 'tools/uuid-generator') {
+    return <UuidGenerator />;
+  }
+
+  if (route === 'tools/regex-tester') {
+    return <RegexTester />;
+  }
+
   if (route === 'tools/color-converter') {
     return <ColorConverter />;
+  }
+
+  if (route === 'tools/contrast-checker') {
+    return <ContrastChecker />;
+  }
+
+  if (route === 'tools/gradient-generator') {
+    return <GradientGenerator />;
+  }
+
+  if (route === 'tools/password-generator') {
+    return <PasswordGenerator />;
+  }
+
+  if (route === 'tools/lorem-ipsum') {
+    return <LoremIpsum />;
+  }
+
+  if (route === 'tools/percentage-calculator') {
+    return <PercentageCalculator />;
+  }
+
+  if (route === 'tools/tip-calculator') {
+    return <TipCalculator />;
+  }
+
+  if (route === 'tools/date-difference') {
+    return <DateDifference />;
   }
 
   return (

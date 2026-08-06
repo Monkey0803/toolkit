@@ -1,10 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildGradient,
+  calculatePercentage,
+  contrastRatio,
+  convertCase,
+  convertUnit,
+  countWords,
+  dateToUnix,
+  daysBetween,
+  decodeUrlComponent,
+  encodeUrlComponent,
+  generateLorem,
+  generatePassword,
+  generateUuids,
+  getRouteFromHash,
+  parseHexColor,
+  regexMatches,
+  renderMarkdown,
+  splitTip,
+  unixToDate,
+  wcagLevel,
   decodeBase64,
   encodeBase64,
   formatJson,
-  getRouteFromHash,
-  parseHexColor,
 } from './toolkit-tools';
 
 describe('JSON helpers', () => {
@@ -51,5 +69,96 @@ describe('hash routes', () => {
   it('normalizes hash values', () => {
     expect(getRouteFromHash('#/tools/json-formatter')).toBe('tools/json-formatter');
     expect(getRouteFromHash('')).toBe('');
+  });
+});
+
+describe('word counting', () => {
+  it('counts words, characters, sentences, and reading time', () => {
+    expect(countWords('Hello world. This is a test.')).toEqual({
+      words: 6,
+      characters: 28,
+      charactersNoSpaces: 23,
+      sentences: 2,
+      readingMinutes: 1,
+    });
+  });
+});
+
+describe('case conversion', () => {
+  it('converts between common styles', () => {
+    expect(convertCase('hello world', 'title')).toBe('Hello World');
+    expect(convertCase('hello world', 'camel')).toBe('helloWorld');
+    expect(convertCase('hello world', 'snake')).toBe('hello_world');
+    expect(convertCase('hello world', 'kebab')).toBe('hello-world');
+  });
+});
+
+describe('markdown rendering', () => {
+  it('renders headings, lists, emphasis, and escapes HTML', () => {
+    expect(renderMarkdown('# Title')).toContain('<h1>Title</h1>');
+    expect(renderMarkdown('- item')).toContain('<li>item</li>');
+    expect(renderMarkdown('<script>alert(1)</script>')).not.toContain('<script>');
+  });
+});
+
+describe('URL helpers', () => {
+  it('encodes and decodes URL components', () => {
+    expect(encodeUrlComponent('a b&c')).toBe('a%20b%26c');
+    expect(decodeUrlComponent('a%20b%26c')).toBe('a b&c');
+  });
+});
+
+describe('timestamp helpers', () => {
+  it('converts timestamps both directions', () => {
+    const { seconds, milliseconds } = dateToUnix(2024, 1, 1, 0, 0);
+    expect(milliseconds).toBe(seconds * 1000);
+    expect(unixToDate(String(seconds), 'seconds')).toContain('2024');
+  });
+});
+
+describe('unit conversion', () => {
+  it('converts length and temperature', () => {
+    expect(convertUnit(1, 'km', 'm', 'length')).toBeCloseTo(1000, 6);
+    expect(convertUnit(0, 'c', 'f', 'temperature')).toBeCloseTo(32, 6);
+  });
+});
+
+describe('developer helpers', () => {
+  it('generates UUIDs and matches regex', () => {
+    expect(generateUuids(3)).toHaveLength(3);
+    expect(generateUuids(3)[0]).toMatch(/^[\da-f-]{36}$/);
+    expect(regexMatches('\\d+', 'a1b22')).toEqual(['1', '22']);
+    expect(regexMatches('[', 'x')).toEqual([]);
+  });
+});
+
+describe('color and gradient helpers', () => {
+  it('computes contrast and WCAG level', () => {
+    expect(contrastRatio('#FFFFFF', '#000000')).toBeCloseTo(21, 0);
+    expect(wcagLevel(7)).toBe('AAA');
+    expect(wcagLevel(2)).toBe('Fail');
+  });
+
+  it('builds a gradient string', () => {
+    expect(buildGradient('#FFFFFF', '#000000', 90)).toBe('linear-gradient(90deg, #FFFFFF, #000000)');
+  });
+});
+
+describe('everyday helpers', () => {
+  it('calculates percentage and tip split', () => {
+    expect(calculatePercentage('percent', 50, 200)).toBe('25.00%');
+    expect(splitTip(100, 15, 4)).toBe(28.75);
+  });
+
+  it('computes date difference in days', () => {
+    expect(daysBetween('2024-01-01', '2024-01-31')).toBe(30);
+  });
+
+  it('generates passwords with a minimum length', () => {
+    expect(generatePassword(16, { lower: true, upper: true, digits: true, symbols: true })).toHaveLength(16);
+  });
+
+  it('generates lorem paragraphs', () => {
+    expect(generateLorem(2).split('\n\n')).toHaveLength(2);
   });
 });
