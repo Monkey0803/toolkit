@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { categoryName } from '../lib/i18n';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 
 type ToolPageShellProps = {
   title: string;
@@ -25,6 +26,7 @@ export async function copyText(value: string): Promise<boolean> {
 
 export function ToolPageShell({ title, description, category, children, status, statusKind = 'neutral', onBack }: ToolPageShellProps) {
   const { lang, t, toggleLang } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="app-shell tool-shell">
@@ -33,6 +35,7 @@ export function ToolPageShell({ title, description, category, children, status, 
         <nav className="site-nav" aria-label="Primary navigation">
           <a className="tool-header-link" href="#/">{t('shell.browseAll')} <span aria-hidden="true">↗</span></a>
           <button className="lang-toggle" type="button" aria-label={t('lang.label')} onClick={toggleLang}>{t('lang.button')}</button>
+          <button className="lang-toggle theme-toggle" type="button" aria-label={t('theme.toggle')} onClick={toggleTheme}><span aria-hidden="true">{theme === 'light' ? '☾' : '☀'}</span></button>
         </nav>
       </header>
 

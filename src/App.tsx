@@ -4,6 +4,7 @@ import { filterTools, readSavedToolIds, writeSavedToolIds } from './lib/toolkit'
 import { getRouteFromHash } from './lib/toolkit-tools';
 import { categoryName } from './lib/i18n';
 import { useLanguage } from './context/LanguageContext';
+import { useTheme } from './context/ThemeContext';
 import { Base64Encoder } from './components/tools/Base64Encoder';
 import { CaseConverter } from './components/tools/CaseConverter';
 import { ColorConverter } from './components/tools/ColorConverter';
@@ -81,6 +82,7 @@ function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boole
 
 function App() {
   const { lang, t, toggleLang } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [route, setRoute] = useState(() => getRouteFromHash(window.location.hash));
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('All');
@@ -232,6 +234,7 @@ function App() {
             {t('nav.saved')} <strong>{String(savedIds.size).padStart(2, '0')}</strong>
           </span>
           <button className="lang-toggle" type="button" aria-label={t('lang.label')} onClick={toggleLang}>{t('lang.button')}</button>
+          <button className="lang-toggle theme-toggle" type="button" aria-label={t('theme.toggle')} onClick={toggleTheme}><span aria-hidden="true">{theme === 'light' ? '☾' : '☀'}</span></button>
         </nav>
       </header>
 
