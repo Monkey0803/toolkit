@@ -11,10 +11,12 @@ import { ContrastChecker } from './components/tools/ContrastChecker';
 import { DateDifference } from './components/tools/DateDifference';
 import { GradientGenerator } from './components/tools/GradientGenerator';
 import { JsonFormatter } from './components/tools/JsonFormatter';
+import { ImageResizer } from './components/tools/ImageResizer';
 import { LoremIpsum } from './components/tools/LoremIpsum';
 import { MarkdownPreviewer } from './components/tools/MarkdownPreviewer';
 import { PasswordGenerator } from './components/tools/PasswordGenerator';
 import { PercentageCalculator } from './components/tools/PercentageCalculator';
+import { QrCodeMaker } from './components/tools/QrCodeMaker';
 import { RegexTester } from './components/tools/RegexTester';
 import { TimestampConverter } from './components/tools/TimestampConverter';
 import { TipCalculator } from './components/tools/TipCalculator';
@@ -186,6 +188,14 @@ function App() {
 
   if (route === 'tools/gradient-generator') {
     return <GradientGenerator />;
+  }
+
+  if (route === 'tools/qr-code-maker') {
+    return <QrCodeMaker />;
+  }
+
+  if (route === 'tools/image-resizer') {
+    return <ImageResizer />;
   }
 
   if (route === 'tools/password-generator') {
