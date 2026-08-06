@@ -28,6 +28,24 @@ import { WordCounter } from './components/tools/WordCounter';
 
 type ActiveCategory = 'All' | ToolCategory;
 type SavedIds = Set<string>;
+type DirState = {
+  query: string;
+  activeCategory: ActiveCategory;
+  showSavedOnly: boolean;
+  showRecentOnly: boolean;
+  sortMode: SortMode;
+};
+
+const DIR_STATE_KEY = 'toolkit:dir-state';
+
+function readDirState(): Partial<DirState> {
+  try {
+    const parsed: unknown = JSON.parse(window.sessionStorage.getItem(DIR_STATE_KEY) ?? 'null');
+    return parsed && typeof parsed === 'object' ? (parsed as Partial<DirState>) : {};
+  } catch {
+    return {};
+  }
+}
 
 function getInitialSavedIds(): Set<string> {
   try {
@@ -83,12 +101,13 @@ function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boole
 function App() {
   const { lang, t, toggleLang } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const initialDirState = readDirState();
   const [route, setRoute] = useState(() => getRouteFromHash(window.location.hash));
-  const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<ActiveCategory>('All');
-  const [showSavedOnly, setShowSavedOnly] = useState(false);
-  const [showRecentOnly, setShowRecentOnly] = useState(false);
-  const [sortMode, setSortMode] = useState<SortMode>('default');
+  const [query, setQuery] = useState(initialDirState.query ?? '');
+  const [activeCategory, setActiveCategory] = useState<ActiveCategory>(initialDirState.activeCategory ?? 'All');
+  const [showSavedOnly, setShowSavedOnly] = useState(initialDirState.showSavedOnly ?? false);
+  const [showRecentOnly, setShowRecentOnly] = useState(initialDirState.showRecentOnly ?? false);
+  const [sortMode, setSortMode] = useState<SortMode>(initialDirState.sortMode ?? 'default');
   const [savedIds, setSavedIds] = useState<Set<string>>(getInitialSavedIds);
   const [recentIds, setRecentIds] = useState<string[]>(() => readRecentToolIds(window.localStorage));
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +116,15 @@ function App() {
     ? categoryFiltered.filter((tool) => savedIds.has(tool.id))
     : categoryFiltered;
   const visibleTools = sortTools(showRecentOnly ? filtered.filter((tool) => recentIds.includes(tool.id)) : filtered, sortMode);
+
+  useEffect(() => {
+    const state: DirState = { query, activeCategory, showSavedOnly, showRecentOnly, sortMode };
+    try {
+      window.sessionStorage.setItem(DIR_STATE_KEY, JSON.stringify(state));
+    } catch {
+      // Directory state persistence is optional.
+    }
+  }, [query, activeCategory, showSavedOnly, showRecentOnly, sortMode]);
 
   useEffect(() => {
     document.title = lang === 'zh' ? '工具箱 · 小工具，大能量。' : 'Toolkit. Small tools, big momentum.';
@@ -156,6 +184,21 @@ function App() {
     setActiveCategory('All');
     setShowSavedOnly(false);
     setShowRecentOnly(false);
+  }
+
+  function exportSaved() {
+    const savedTools = tools
+      .filter((tool) => savedIds.has(tool.id))
+      .map(({ id, name, nameZh, route }) => ({ id, name, nameZh, route }));
+    if (savedTools.length === 0) return;
+
+    const blob = new Blob([JSON.stringify(savedTools, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'toolkit-saved.json';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   if (route === 'tools/json-formatter') {
@@ -240,6 +283,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#tool-directory">{t('a11y.skip')}</a>
       <header className="site-header">
         <a className="brand" href="#/" aria-label="Toolkit home">
           TOOLKIT<span aria-hidden="true">.</span>
@@ -294,6 +338,7 @@ function App() {
                   <option value="category">{t('sort.category')}</option>
                 </select>
               </label>
+              <button className="text-button" type="button" disabled={savedIds.size === 0} title={savedIds.size === 0 ? t('export.none') : undefined} onClick={exportSaved}>{t('export.saved')}</button>
               <p className="result-summary" aria-live="polite">
                 {visibleTools.length} {lang === 'zh' ? '个工具' : (visibleTools.length === 1 ? 'tool' : 'tools')}
                 {showSavedOnly ? (lang === 'zh' ? '，已收藏' : ' saved') : ''}

@@ -26,7 +26,7 @@ export function WordCounter() {
       <div className="tool-workbench">
         <section className="tool-panel" aria-labelledby="word-counter-input-title">
           <div className="tool-panel__heading"><h2 id="word-counter-input-title">{t('word.text')}</h2><span>{t('common.live')}</span></div>
-          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={lang === 'zh' ? SAMPLE_ZH : SAMPLE_EN} spellCheck={false} />
+          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={lang === 'zh' ? SAMPLE_ZH : SAMPLE_EN} aria-label={t('word.text')} spellCheck={false} />
         </section>
         <section className="tool-panel" aria-labelledby="word-counter-stats-title">
           <div className="tool-panel__heading"><h2 id="word-counter-stats-title">{t('word.stats')}</h2><span>{t('common.instant')}</span></div>

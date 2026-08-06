@@ -33,7 +33,7 @@ export function CaseConverter() {
       <div className="tool-workbench tool-workbench--split">
         <section className="tool-panel" aria-labelledby="case-input-title">
           <div className="tool-panel__heading"><h2 id="case-input-title">{t('common.input')}</h2><span>{t('word.text')}</span></div>
-          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={'hello world'} spellCheck={false} />
+          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={'hello world'} aria-label={t('common.input')} spellCheck={false} />
         </section>
         <section className="tool-panel" aria-labelledby="case-result-title">
           <div className="tool-panel__heading"><h2 id="case-result-title">{t('common.output')}</h2><button className="text-button" type="button" onClick={copyResult}>{t('common.copyResult')}</button></div>

@@ -40,7 +40,7 @@ export function JsonFormatter() {
       <div className="tool-workbench tool-workbench--split">
         <section className="tool-panel" aria-labelledby="json-input-title">
           <div className="tool-panel__heading"><h2 id="json-input-title">{t('common.input')}</h2><span>JSON</span></div>
-          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={t('json.placeholder')} spellCheck={false} />
+          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={t('json.placeholder')} aria-label={t('common.input')} spellCheck={false} />
           <div className="tool-toolbar">
             <button className="button button--primary" type="button" onClick={() => transform(false)}>{t('json.format')}</button>
             <button className="button" type="button" onClick={() => transform(true)}>{t('json.minify')}</button>

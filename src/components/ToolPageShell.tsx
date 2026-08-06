@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { categoryName } from '../lib/i18n';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -27,9 +27,16 @@ export async function copyText(value: string): Promise<boolean> {
 export function ToolPageShell({ title, description, category, children, status, statusKind = 'neutral', onBack }: ToolPageShellProps) {
   const { lang, t, toggleLang } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  async function copyLink() {
+    const copied = await copyText(window.location.href);
+    setLinkCopied(copied);
+  }
 
   return (
     <div className="app-shell tool-shell">
+      <a className="skip-link" href="#tool-page-title">{t('a11y.skip')}</a>
       <header className="site-header">
         <a className="brand" href="#/" aria-label="Toolkit home">TOOLKIT<span aria-hidden="true">.</span></a>
         <nav className="site-nav" aria-label="Primary navigation">
@@ -40,9 +47,14 @@ export function ToolPageShell({ title, description, category, children, status, 
       </header>
 
       <main className="tool-page" aria-labelledby="tool-page-title">
-        <a className="back-link" href="#/" onClick={onBack}>
-          <span aria-hidden="true">←</span> {t('shell.back')}
-        </a>
+        <div className="tool-top-row">
+          <a className="back-link" href="#/" onClick={onBack}>
+            <span aria-hidden="true">←</span> {t('shell.back')}
+          </a>
+          <span className="tool-copy-link">
+            <button className="text-button" type="button" onClick={copyLink}>{linkCopied ? t('tool.linkCopied') : t('tool.copyLink')}</button>
+          </span>
+        </div>
         <section className="tool-intro">
           <p className="eyebrow"><span aria-hidden="true">/</span> {categoryName(lang, category)}</p>
           <h1 id="tool-page-title">{title}</h1>

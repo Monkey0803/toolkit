@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import QRCode from 'qrcode';
+import qrcode from 'qrcode-generator';
 import { getTool } from '../../data/tools';
 import { useLanguage } from '../../context/LanguageContext';
 import { ToolPageShell } from '../ToolPageShell';
@@ -16,15 +16,18 @@ export function QrCodeMaker() {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 
-  async function generate() {
+  function generate() {
     if (!content.trim()) {
       setError(t('qr.empty'));
       setDataUrl('');
       return;
     }
     try {
-      const url = await QRCode.toDataURL(content.trim(), { width: size, errorCorrectionLevel: errorCorrection, margin: 2 });
-      setDataUrl(url);
+      const qr = qrcode(0, errorCorrection);
+      qr.addData(content.trim());
+      qr.make();
+      const cellSize = Math.max(1, Math.floor(size / qr.getModuleCount()));
+      setDataUrl(qr.createDataURL(cellSize, 2));
       setError('');
       setStatus(t('qr.generated'));
     } catch {

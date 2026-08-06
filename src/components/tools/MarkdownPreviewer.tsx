@@ -35,7 +35,7 @@ export function MarkdownPreviewer() {
       <div className="tool-workbench tool-workbench--split">
         <section className="tool-panel" aria-labelledby="md-input-title">
           <div className="tool-panel__heading"><h2 id="md-input-title">{t('md.markdown')}</h2><span>{t('md.source')}</span></div>
-          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={lang === 'zh' ? SAMPLE_ZH : SAMPLE_EN} spellCheck={false} />
+          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={lang === 'zh' ? SAMPLE_ZH : SAMPLE_EN} aria-label={t('md.markdown')} spellCheck={false} />
         </section>
         <section className="tool-panel" aria-labelledby="md-preview-title">
           <div className="tool-panel__heading"><h2 id="md-preview-title">{t('common.preview')}</h2><span>{t('common.live')}</span></div>

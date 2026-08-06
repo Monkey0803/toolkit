@@ -135,54 +135,109 @@ function escapeHtml(source: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function inlineMarkdown(text: string): string {
+  const escaped = escapeHtml(text);
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+
 export function renderMarkdown(source: string): string {
-  const lines = escapeHtml(source).split(/\r?\n/);
+  const lines = source.replace(/\r\n/g, '\n').split('\n');
   const output: string[] = [];
   let inCode = false;
+  let listType: 'ul' | 'ol' | null = null;
 
-  for (const line of lines) {
-    if (line.trim().startsWith('```')) {
+  function closeList() {
+    if (listType) {
+      output.push(`</${listType}>`);
+      listType = null;
+    }
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (line.startsWith('```')) {
+      closeList();
       output.push(inCode ? '</code></pre>' : '<pre><code>');
       inCode = !inCode;
       continue;
     }
 
     if (inCode) {
-      output.push(`${line}\n`);
+      output.push(`${escapeHtml(rawLine)}\n`);
+      continue;
+    }
+
+    if (!line) {
+      closeList();
+      output.push('');
       continue;
     }
 
     const heading = line.match(/^(#{1,3})\s+(.+)/);
     if (heading) {
-      const level = Math.min(heading[1].length, 3);
-      output.push(`<h${level}>${heading[2]}</h${level}>`);
+      closeList();
+      const level = heading[1].length;
+      output.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
       continue;
     }
 
-    const listItem = line.match(/^\s*[-*]\s+(.+)/);
-    if (listItem) {
-      output.push(`<li>${listItem[1]}</li>`);
+    if (/^(-{3,}|\*{3,})$/.test(line)) {
+      closeList();
+      output.push('<hr />');
+      continue;
+    }
+
+    const unordered = line.match(/^[-*]\s+(.+)/);
+    if (unordered) {
+      if (listType !== 'ul') {
+        closeList();
+        output.push('<ul>');
+        listType = 'ul';
+      }
+      output.push(`<li>${inlineMarkdown(unordered[1])}</li>`);
+      continue;
+    }
+
+    const ordered = line.match(/^\d+[.)]\s+(.+)/);
+    if (ordered) {
+      if (listType !== 'ol') {
+        closeList();
+        output.push('<ol>');
+        listType = 'ol';
+      }
+      output.push(`<li>${inlineMarkdown(ordered[1])}</li>`);
+      continue;
+    }
+
+    const quote = line.match(/^>\s?(.*)/);
+    if (quote) {
+      closeList();
+      output.push(`<blockquote>${inlineMarkdown(quote[1])}</blockquote>`);
+      continue;
+    }
+
+    closeList();
+
+    const image = line.match(/^!\[(.+)\]\((.+)\)$/);
+    if (image) {
+      output.push(`<p><img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1])}" /></p>`);
       continue;
     }
 
     const link = line.match(/^\[(.+)\]\((.+)\)$/);
     if (link) {
-      output.push(`<p><a href="${link[2]}">${link[1]}</a></p>`);
+      output.push(`<p><a href="${escapeHtml(link[2])}">${escapeHtml(link[1])}</a></p>`);
       continue;
     }
 
-    if (line.trim() === '') {
-      output.push('');
-      continue;
-    }
-
-    const formatted = line
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`(.+?)`/g, '<code>$1</code>');
-    output.push(`<p>${formatted}</p>`);
+    output.push(`<p>${inlineMarkdown(line)}</p>`);
   }
 
+  closeList();
   if (inCode) output.push('</code></pre>');
   return output.join('\n');
 }

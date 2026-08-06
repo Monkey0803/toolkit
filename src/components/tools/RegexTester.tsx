@@ -24,7 +24,7 @@ export function RegexTester() {
           <label className="field-label" htmlFor="regex-pattern">{t('regex.expression')}</label>
           <input id="regex-pattern" className="field-input code-input" value={pattern} onChange={(event) => setPattern(event.target.value)} placeholder="\d+" spellCheck={false} />
           <label className="field-label" htmlFor="regex-source">{t('regex.sampleText')}</label>
-          <textarea id="regex-source" className="code-editor" value={source} onChange={(event) => setSource(event.target.value)} placeholder={'a1 b22 c333'} spellCheck={false} />
+          <textarea id="regex-source" className="code-editor" value={source} onChange={(event) => setSource(event.target.value)} placeholder={'a1 b22 c333'} aria-label={t('regex.sampleText')} spellCheck={false} />
         </section>
         <section className="tool-panel" aria-labelledby="regex-result-title">
           <div className="tool-panel__heading"><h2 id="regex-result-title">{t('regex.matches')}</h2><span>{matches.length}</span></div>

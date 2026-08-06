@@ -107,6 +107,24 @@ input:focus-visible {
   margin: 0 auto;
 }
 
+.skip-link {
+  position: fixed;
+  top: -48px;
+  left: 16px;
+  z-index: 20;
+  padding: 10px 14px;
+  border-radius: 0 0 8px 8px;
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  font-size: 0.74rem;
+  font-weight: 750;
+  transition: top 180ms ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .site-header {
   display: flex;
   align-items: center;
@@ -613,11 +631,23 @@ kbd {
   padding: 48px 0 72px;
 }
 
+.tool-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 64px;
+}
+
+.tool-copy-link .text-button:disabled {
+  color: var(--soft);
+  cursor: default;
+}
+
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 64px;
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 700;
@@ -1466,7 +1496,7 @@ kbd {
     padding-top: 32px;
   }
 
-  .back-link {
+  .tool-top-row {
     margin-bottom: 48px;
   }
 

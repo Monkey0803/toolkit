@@ -42,12 +42,12 @@ export function UrlEncoder() {
       <div className="tool-workbench tool-workbench--split">
         <section className="tool-panel" aria-labelledby="url-input-title">
           <div className="tool-panel__heading"><h2 id="url-input-title">{t('common.input')}</h2><span>{mode === 'encode' ? t('word.text') : t('url.encodedLabel')}</span></div>
-          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={mode === 'encode' ? t('url.placeholderEn') : t('url.placeholderDec')} spellCheck={false} />
+          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={mode === 'encode' ? t('url.placeholderEn') : t('url.placeholderDec')} aria-label={t('common.input')} spellCheck={false} />
           <div className="tool-toolbar"><button className="button button--primary" type="button" onClick={convert}>{t('common.convert')}</button></div>
         </section>
         <section className="tool-panel" aria-labelledby="url-result-title">
           <div className="tool-panel__heading"><h2 id="url-result-title">{t('common.result')}</h2><button className="text-button" type="button" onClick={copyResult}>{t('common.copyResult')}</button></div>
-          <textarea className="code-editor" readOnly value={result} placeholder={t('url.resultPlaceholder')} spellCheck={false} />
+          <textarea className="code-editor" readOnly value={result} placeholder={t('url.resultPlaceholder')} aria-label={t('common.result')} spellCheck={false} />
         </section>
       </div>
     </ToolPageShell>

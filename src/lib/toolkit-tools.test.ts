@@ -94,10 +94,27 @@ describe('case conversion', () => {
 });
 
 describe('markdown rendering', () => {
+  const md = (source: string) => renderMarkdown(source).replace(/\n/g, '');
+
   it('renders headings, lists, emphasis, and escapes HTML', () => {
-    expect(renderMarkdown('# Title')).toContain('<h1>Title</h1>');
-    expect(renderMarkdown('- item')).toContain('<li>item</li>');
-    expect(renderMarkdown('<script>alert(1)</script>')).not.toContain('<script>');
+    expect(md('# Title')).toContain('<h1>Title</h1>');
+    expect(md('- item')).toContain('<ul><li>item</li></ul>');
+    expect(md('<script>alert(1)</script>')).not.toContain('<script>');
+  });
+
+  it('groups consecutive list items into a single list', () => {
+    expect(md('- a\n- b\n- c')).toContain('<ul><li>a</li><li>b</li><li>c</li></ul>');
+  });
+
+  it('renders ordered lists, blockquotes, and horizontal rules', () => {
+    expect(md('1. first\n2. second')).toContain('<ol><li>first</li><li>second</li></ol>');
+    expect(md('> note')).toContain('<blockquote>note</blockquote>');
+    expect(md('---')).toContain('<hr />');
+  });
+
+  it('renders images and links with escaped attributes', () => {
+    expect(md('![alt text](https://example.com/a.png)')).toContain('<img src="https://example.com/a.png" alt="alt text" />');
+    expect(md('[link](https://example.com/?a=1&b=2)')).toContain('href="https://example.com/?a=1&amp;b=2"');
   });
 });
 

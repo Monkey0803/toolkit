@@ -47,7 +47,7 @@ export function Base64Encoder() {
       <div className="tool-workbench tool-workbench--split">
         <section className="tool-panel" aria-labelledby="base64-input-title">
           <div className="tool-panel__heading"><h2 id="base64-input-title">{t('common.input')}</h2><span>{mode === 'encode' ? t('b64.plainText') : t('b64.base64')}</span></div>
-          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={mode === 'encode' ? t('b64.placeholderEn') : t('b64.placeholderDec')} spellCheck={false} />
+          <textarea className="code-editor" value={input} onChange={(event) => setInput(event.target.value)} placeholder={mode === 'encode' ? t('b64.placeholderEn') : t('b64.placeholderDec')} aria-label={t('common.input')} spellCheck={false} />
           <div className="tool-toolbar">
             <button className="button button--primary" type="button" onClick={convert}>{t('common.convert')}</button>
             <button className="button button--quiet" type="button" onClick={clear}>{t('common.clear')}</button>
