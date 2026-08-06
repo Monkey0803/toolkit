@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "test": "vitest run"
+    "build": "tsc -b && vite build && node scripts/inline-dist.mjs",
+    "test": "vitest run",
+    "test:dist": "npm run build && node scripts/verify-dist.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
