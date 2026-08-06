@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Hash 路由在客户端完成，fallback 仅作兜底
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

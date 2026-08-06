@@ -92,6 +92,7 @@ function App() {
 
   useEffect(() => {
     document.title = lang === 'zh' ? '工具箱 · 小工具，大能量。' : 'Toolkit. Small tools, big momentum.';
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   }, [lang]);
 
   useEffect(() => {
