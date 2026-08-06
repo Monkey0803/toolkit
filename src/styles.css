@@ -192,11 +192,23 @@ input:focus-visible {
   color: var(--ink);
 }
 
-.theme-toggle {
-  min-width: 34px;
-  padding: 0 9px;
-  font-size: 0.85rem;
-  line-height: 1;
+.theme-select select {
+  min-height: 30px;
+  padding: 0 26px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236d8194'/%3E%3C/svg%3E") no-repeat right 9px center;
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 800;
+  outline: 0;
+  appearance: none;
+  cursor: pointer;
+}
+
+.theme-select select:focus {
+  border-color: #7c9bb6;
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .hero {

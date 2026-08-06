@@ -26,7 +26,7 @@ export async function copyText(value: string): Promise<boolean> {
 
 export function ToolPageShell({ title, description, category, children, status, statusKind = 'neutral', onBack }: ToolPageShellProps) {
   const { lang, t, toggleLang } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [linkCopied, setLinkCopied] = useState(false);
 
   async function copyLink() {
@@ -42,7 +42,13 @@ export function ToolPageShell({ title, description, category, children, status, 
         <nav className="site-nav" aria-label="Primary navigation">
           <a className="tool-header-link" href="#/">{t('shell.browseAll')} <span aria-hidden="true">↗</span></a>
           <button className="lang-toggle" type="button" aria-label={t('lang.label')} onClick={toggleLang}>{t('lang.button')}</button>
-          <button className="lang-toggle theme-toggle" type="button" aria-label={t('theme.toggle')} onClick={toggleTheme}><span aria-hidden="true">{theme === 'light' ? '☾' : '☀'}</span></button>
+          <label className="theme-select" aria-label={t('theme.toggle')}>
+            <select value={theme} onChange={(event) => setTheme(event.target.value as 'light' | 'dark' | 'system')}>
+              <option value="light">{t('theme.light')}</option>
+              <option value="dark">{t('theme.dark')}</option>
+              <option value="system">{t('theme.system')}</option>
+            </select>
+          </label>
         </nav>
       </header>
 

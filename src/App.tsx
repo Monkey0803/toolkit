@@ -100,7 +100,7 @@ function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boole
 
 function App() {
   const { lang, t, toggleLang } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const initialDirState = readDirState();
   const [route, setRoute] = useState(() => getRouteFromHash(window.location.hash));
   const [query, setQuery] = useState(initialDirState.query ?? '');
@@ -295,7 +295,13 @@ function App() {
             {t('nav.saved')} <strong>{String(savedIds.size).padStart(2, '0')}</strong>
           </span>
           <button className="lang-toggle" type="button" aria-label={t('lang.label')} onClick={toggleLang}>{t('lang.button')}</button>
-          <button className="lang-toggle theme-toggle" type="button" aria-label={t('theme.toggle')} onClick={toggleTheme}><span aria-hidden="true">{theme === 'light' ? '☾' : '☀'}</span></button>
+          <label className="theme-select" aria-label={t('theme.toggle')}>
+            <select value={theme} onChange={(event) => setTheme(event.target.value as 'light' | 'dark' | 'system')}>
+              <option value="light">{t('theme.light')}</option>
+              <option value="dark">{t('theme.dark')}</option>
+              <option value="system">{t('theme.system')}</option>
+            </select>
+          </label>
         </nav>
       </header>
 
