@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { categories, tools, type Tool, type ToolCategory } from './data/tools';
 import { filterTools, readSavedToolIds, writeSavedToolIds } from './lib/toolkit';
 import { getRouteFromHash } from './lib/toolkit-tools';
@@ -75,14 +75,36 @@ function App() {
   const [route, setRoute] = useState(() => getRouteFromHash(window.location.hash));
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('All');
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [savedIds, setSavedIds] = useState<Set<string>>(getInitialSavedIds);
-  const visibleTools = filterTools(tools, query, activeCategory);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const categoryFiltered = filterTools(tools, query, activeCategory);
+  const visibleTools = showSavedOnly ? categoryFiltered.filter((tool) => savedIds.has(tool.id)) : categoryFiltered;
 
   useEffect(() => {
     const handleHashChange = () => setRoute(getRouteFromHash(window.location.hash));
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+      if (event.key === '/' && !isTyping && route === '') {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+
+      if (event.key === 'Escape' && document.activeElement === searchInputRef.current) {
+        setQuery('');
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [route]);
 
   function toggleSaved(id: string) {
     setSavedIds((currentIds) => {
@@ -100,6 +122,7 @@ function App() {
   function clearFilters() {
     setQuery('');
     setActiveCategory('All');
+    setShowSavedOnly(false);
   }
 
   if (route === 'tools/json-formatter') {
@@ -201,6 +224,7 @@ function App() {
               <input
                 id="tool-search"
                 type="search"
+                ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search tools by name or category..."
@@ -218,6 +242,7 @@ function App() {
             </div>
             <p className="result-summary" aria-live="polite">
               {visibleTools.length} {visibleTools.length === 1 ? 'tool' : 'tools'}
+              {showSavedOnly ? ' saved' : ''}
               {activeCategory !== 'All' ? ` in ${activeCategory}` : ''}
             </p>
           </div>
@@ -236,6 +261,15 @@ function App() {
                   {category === 'All' && <span className="category-count">{tools.length}</span>}
                 </button>
               ))}
+              <button
+                className={`category-button category-button--saved${showSavedOnly ? ' category-button--active' : ''}`}
+                type="button"
+                aria-pressed={showSavedOnly}
+                onClick={() => setShowSavedOnly((current) => !current)}
+              >
+                Saved
+                <span className="category-count">{savedIds.size}</span>
+              </button>
             </div>
           </nav>
 
@@ -247,9 +281,9 @@ function App() {
             </div>
           ) : (
             <div className="empty-state">
-              <span className="empty-icon" aria-hidden="true">?</span>
-              <h3>No tools match that search.</h3>
-              <p>Try another phrase or browse the full collection.</p>
+              <span className="empty-icon" aria-hidden="true">{showSavedOnly ? '☆' : '?'}</span>
+              <h3>{showSavedOnly ? 'Nothing saved yet.' : 'No tools match that search.'}</h3>
+              <p>{showSavedOnly ? 'Tap the star on any tool to keep it close.' : 'Try another phrase or browse the full collection.'}</p>
               <button type="button" onClick={clearFilters}>Clear filters</button>
             </div>
           )}

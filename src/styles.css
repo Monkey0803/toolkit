@@ -301,6 +301,14 @@ kbd {
   font-size: 0.62rem;
 }
 
+.category-button--saved .category-count {
+  color: var(--accent-deep);
+}
+
+.category-button--saved.category-button--active .category-count {
+  color: var(--accent);
+}
+
 .tools-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
