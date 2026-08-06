@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { categories, tools, type Tool, type ToolCategory } from './data/tools';
 import { filterTools, readSavedToolIds, writeSavedToolIds } from './lib/toolkit';
+import { getRouteFromHash } from './lib/toolkit-tools';
+import { Base64Encoder } from './components/tools/Base64Encoder';
+import { ColorConverter } from './components/tools/ColorConverter';
+import { JsonFormatter } from './components/tools/JsonFormatter';
 
 type ActiveCategory = 'All' | ToolCategory;
 type SavedIds = Set<string>;
@@ -22,6 +26,17 @@ function saveIds(ids: SavedIds): void {
 }
 
 function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boolean; onToggleSaved: (id: string) => void }) {
+  const details = (
+    <>
+      <h3>{tool.name}</h3>
+      <p>{tool.description}</p>
+      <div className="tool-card__meta">
+        <span className="category-label">{tool.category}</span>
+        <span className="tool-tags">{tool.tags.slice(0, 2).join(' / ')}</span>
+      </div>
+    </>
+  );
+
   return (
     <article className="tool-card">
       <div className="tool-card__topline">
@@ -36,21 +51,23 @@ function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boole
           <span aria-hidden="true">{isSaved ? '★' : '☆'}</span>
         </button>
       </div>
-      <h3>{tool.name}</h3>
-      <p>{tool.description}</p>
-      <div className="tool-card__meta">
-        <span className="category-label">{tool.category}</span>
-        <span className="tool-tags">{tool.tags.slice(0, 2).join(' / ')}</span>
-      </div>
+      {tool.route ? <a className="tool-card__link" href={`#/tools/${tool.route}`}>{details}</a> : details}
     </article>
   );
 }
 
 function App() {
+  const [route, setRoute] = useState(() => getRouteFromHash(window.location.hash));
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('All');
   const [savedIds, setSavedIds] = useState<Set<string>>(getInitialSavedIds);
   const visibleTools = filterTools(tools, query, activeCategory);
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(getRouteFromHash(window.location.hash));
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   function toggleSaved(id: string) {
     setSavedIds((currentIds) => {
@@ -70,10 +87,22 @@ function App() {
     setActiveCategory('All');
   }
 
+  if (route === 'tools/json-formatter') {
+    return <JsonFormatter />;
+  }
+
+  if (route === 'tools/base64-encoder') {
+    return <Base64Encoder />;
+  }
+
+  if (route === 'tools/color-converter') {
+    return <ColorConverter />;
+  }
+
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="/" aria-label="Toolkit home">
+        <a className="brand" href="#/" aria-label="Toolkit home">
           TOOLKIT<span aria-hidden="true">.</span>
         </a>
         <nav className="site-nav" aria-label="Primary navigation">

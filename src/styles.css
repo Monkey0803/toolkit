@@ -333,6 +333,14 @@ kbd {
   margin-bottom: 23px;
 }
 
+.tool-card__link {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  color: inherit;
+}
+
 .tool-icon {
   display: inline-grid;
   min-width: 39px;
@@ -481,9 +489,319 @@ kbd {
   color: var(--accent-deep);
 }
 
+.tool-header-link {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.tool-header-link:hover,
+.back-link:hover {
+  color: var(--ink);
+}
+
+.tool-page {
+  padding: 48px 0 72px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 64px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  transition: color 180ms ease;
+}
+
+.tool-intro {
+  max-width: 680px;
+  margin-bottom: 42px;
+}
+
+.tool-intro h1 {
+  margin-bottom: 18px;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+}
+
+.tool-description {
+  max-width: 48ch;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.tool-workspace {
+  display: block;
+}
+
+.tool-workbench {
+  display: grid;
+  gap: 12px;
+}
+
+.tool-workbench--split {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tool-panel {
+  display: flex;
+  min-height: 390px;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(248, 251, 255, 0.78);
+  box-shadow: var(--shadow);
+}
+
+.tool-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+  margin-bottom: 14px;
+}
+
+.tool-panel__heading h2 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tool-panel__heading > span {
+  color: var(--soft);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.64rem;
+}
+
+.code-editor,
+.code-result {
+  width: 100%;
+  min-height: 276px;
+  flex: 1;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eff4f8;
+  color: var(--ink);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow: auto;
+}
+
+.code-editor {
+  resize: vertical;
+  outline: 0;
+}
+
+.code-editor:focus {
+  border-color: #7c9bb6;
+  box-shadow: 0 0 0 4px rgba(177, 217, 79, 0.15);
+}
+
+.code-editor::placeholder,
+.code-result--empty {
+  color: var(--soft);
+}
+
+.tool-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+}
+
+.button,
+.text-button {
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.button:hover {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.button--primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.button--primary:hover {
+  background: #29445d;
+}
+
+.button--quiet {
+  margin-left: auto;
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.text-button {
+  padding: 5px 0;
+  background: transparent;
+  color: #6d93b6;
+}
+
+.text-button:hover {
+  color: var(--ink);
+}
+
+.tool-status {
+  min-height: 26px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.tool-status--error {
+  color: #b44f45;
+}
+
+.tool-status__placeholder {
+  color: var(--soft);
+}
+
+.tool-mode-switch {
+  display: inline-flex;
+  gap: 3px;
+  margin-bottom: 12px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(248, 251, 255, 0.72);
+}
+
+.tool-mode-switch button {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.tool-mode-switch button.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.color-workbench {
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+}
+
+.color-input-panel {
+  min-height: 270px;
+}
+
+.field-label {
+  margin-bottom: 9px;
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+.color-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 58px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #eff4f8;
+}
+
+.color-input-row:focus-within {
+  border-color: #7c9bb6;
+  box-shadow: 0 0 0 4px rgba(177, 217, 79, 0.15);
+}
+
+.color-input-row input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(23, 40, 58, 0.12);
+  border-radius: 6px;
+}
+
+.field-hint {
+  margin: 13px 0 0;
+  color: var(--soft);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.color-values {
+  display: grid;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.color-value-row {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 13px;
+  min-height: 54px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eff4f8;
+}
+
+.color-value-row > span {
+  color: var(--accent-deep);
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.color-value-row code {
+  color: var(--ink);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+}
+
 @media (max-width: 980px) {
   .tools-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tool-workbench--split,
+  .color-workbench {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -532,6 +850,44 @@ kbd {
 
   .tool-card {
     min-height: 184px;
+  }
+
+  .tool-shell .site-header {
+    min-height: 76px;
+  }
+
+  .tool-header-link {
+    font-size: 0.68rem;
+  }
+
+  .tool-page {
+    padding-top: 32px;
+  }
+
+  .back-link {
+    margin-bottom: 48px;
+  }
+
+  .tool-intro {
+    margin-bottom: 30px;
+  }
+
+  .tool-intro h1 {
+    font-size: clamp(3rem, 16vw, 5rem);
+  }
+
+  .tool-panel {
+    min-height: 340px;
+    padding: 15px;
+  }
+
+  .code-editor,
+  .code-result {
+    min-height: 220px;
+  }
+
+  .color-input-panel {
+    min-height: 230px;
   }
 
   .site-footer {

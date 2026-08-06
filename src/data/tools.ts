@@ -13,6 +13,7 @@ export type Tool = {
   category: ToolCategory;
   icon: string;
   tags: string[];
+  route?: string;
 };
 
 export const categories: Array<'All' | ToolCategory> = [
@@ -26,17 +27,17 @@ export const categories: Array<'All' | ToolCategory> = [
 ];
 
 export const tools: Tool[] = [
-  { id: 'json-formatter', name: 'JSON Formatter', description: 'Clean, validate and prettify JSON in a readable shape.', category: 'Developer', icon: '{}', tags: ['json', 'format', 'validate'] },
+  { id: 'json-formatter', name: 'JSON Formatter', description: 'Clean, validate and prettify JSON in a readable shape.', category: 'Developer', icon: '{}', tags: ['json', 'format', 'validate'], route: 'json-formatter' },
   { id: 'word-counter', name: 'Word Counter', description: 'Count words, characters and estimated reading time.', category: 'Text', icon: 'Aa', tags: ['writing', 'characters', 'reading'] },
   { id: 'case-converter', name: 'Case Converter', description: 'Switch text between title, sentence, camel and snake case.', category: 'Text', icon: 'Aa', tags: ['text', 'uppercase', 'camelcase'] },
   { id: 'markdown-previewer', name: 'Markdown Previewer', description: 'Preview lightweight Markdown with a clean live layout.', category: 'Text', icon: 'M>', tags: ['markdown', 'preview', 'writing'] },
-  { id: 'base64-encoder', name: 'Base64 Encoder', description: 'Encode or decode text and small payloads in Base64.', category: 'Convert', icon: '64', tags: ['base64', 'encode', 'decode'] },
+  { id: 'base64-encoder', name: 'Base64 Encoder', description: 'Encode or decode text and small payloads in Base64.', category: 'Convert', icon: '64', tags: ['base64', 'encode', 'decode'], route: 'base64-encoder' },
   { id: 'url-encoder', name: 'URL Encoder', description: 'Safely encode or decode URL components for the web.', category: 'Convert', icon: '%/', tags: ['url', 'uri', 'encode'] },
   { id: 'timestamp-converter', name: 'Timestamp Converter', description: 'Translate Unix timestamps into readable dates and times.', category: 'Convert', icon: '12', tags: ['unix', 'date', 'time'] },
   { id: 'unit-converter', name: 'Unit Converter', description: 'Convert length, weight, temperature and volume at a glance.', category: 'Everyday', icon: '<>', tags: ['units', 'metric', 'imperial'] },
   { id: 'uuid-generator', name: 'UUID Generator', description: 'Generate unique IDs for records, mocks and prototypes.', category: 'Developer', icon: 'ID', tags: ['uuid', 'id', 'random'] },
   { id: 'regex-tester', name: 'Regex Tester', description: 'Check patterns against sample text with readable matches.', category: 'Developer', icon: '.*', tags: ['regex', 'pattern', 'developer'] },
-  { id: 'color-converter', name: 'Color Converter', description: 'Move between HEX, RGB, HSL and named color values.', category: 'Image & Color', icon: '#', tags: ['hex', 'rgb', 'hsl', 'color'] },
+  { id: 'color-converter', name: 'Color Converter', description: 'Move between HEX, RGB, HSL and named color values.', category: 'Image & Color', icon: '#', tags: ['hex', 'rgb', 'hsl', 'color'], route: 'color-converter' },
   { id: 'contrast-checker', name: 'Contrast Checker', description: 'Check foreground and background contrast for readable UI.', category: 'Image & Color', icon: 'A/', tags: ['accessibility', 'wcag', 'color'] },
   { id: 'gradient-generator', name: 'Gradient Generator', description: 'Build simple CSS gradients with balanced color stops.', category: 'Image & Color', icon: '///', tags: ['css', 'gradient', 'design'] },
   { id: 'image-resizer', name: 'Image Resizer', description: 'Calculate proportional image sizes before exporting assets.', category: 'Image & Color', icon: 'img', tags: ['image', 'resize', 'design'] },
