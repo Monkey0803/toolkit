@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { categories, tools, type Tool, type ToolCategory } from './data/tools';
-import { filterTools, readSavedToolIds, writeSavedToolIds } from './lib/toolkit';
+import { filterTools, readRecentToolIds, readSavedToolIds, recordRecentTool, sortTools, writeSavedToolIds, type SortMode } from './lib/toolkit';
 import { getRouteFromHash } from './lib/toolkit-tools';
 import { categoryName } from './lib/i18n';
 import { useLanguage } from './context/LanguageContext';
@@ -87,10 +87,16 @@ function App() {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('All');
   const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [showRecentOnly, setShowRecentOnly] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('default');
   const [savedIds, setSavedIds] = useState<Set<string>>(getInitialSavedIds);
+  const [recentIds, setRecentIds] = useState<string[]>(() => readRecentToolIds(window.localStorage));
   const searchInputRef = useRef<HTMLInputElement>(null);
   const categoryFiltered = filterTools(tools, query, activeCategory);
-  const visibleTools = showSavedOnly ? categoryFiltered.filter((tool) => savedIds.has(tool.id)) : categoryFiltered;
+  const filtered = showSavedOnly
+    ? categoryFiltered.filter((tool) => savedIds.has(tool.id))
+    : categoryFiltered;
+  const visibleTools = sortTools(showRecentOnly ? filtered.filter((tool) => recentIds.includes(tool.id)) : filtered, sortMode);
 
   useEffect(() => {
     document.title = lang === 'zh' ? '工具箱 · 小工具，大能量。' : 'Toolkit. Small tools, big momentum.';
@@ -102,6 +108,16 @@ function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  useEffect(() => {
+    if (!route.startsWith('tools/')) return;
+    const tool = tools.find((item) => item.route === route.slice('tools/'.length));
+    if (!tool) return;
+    setRecentIds((current) => {
+      const next = recordRecentTool(window.localStorage, tool.id);
+      return next.length === current.length && next[0] === current[0] ? current : next;
+    });
+  }, [route]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -139,6 +155,7 @@ function App() {
     setQuery('');
     setActiveCategory('All');
     setShowSavedOnly(false);
+    setShowRecentOnly(false);
   }
 
   if (route === 'tools/json-formatter') {
@@ -268,11 +285,22 @@ function App() {
               <p className="section-kicker">{t('section.kicker')}</p>
               <h2 id="catalog-title">{t('section.title')}</h2>
             </div>
-            <p className="result-summary" aria-live="polite">
-              {visibleTools.length} {lang === 'zh' ? '个工具' : (visibleTools.length === 1 ? 'tool' : 'tools')}
-              {showSavedOnly ? (lang === 'zh' ? '，已收藏' : ' saved') : ''}
-              {activeCategory !== 'All' ? `${lang === 'zh' ? '，' : ' in '}${categoryName(lang, activeCategory)}` : ''}
-            </p>
+            <div className="catalog-tools">
+              <label className="sort-control" htmlFor="sort-select">
+                <span>{t('sort.label')}</span>
+                <select id="sort-select" value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}>
+                  <option value="default">{t('sort.default')}</option>
+                  <option value="name">{t('sort.name')}</option>
+                  <option value="category">{t('sort.category')}</option>
+                </select>
+              </label>
+              <p className="result-summary" aria-live="polite">
+                {visibleTools.length} {lang === 'zh' ? '个工具' : (visibleTools.length === 1 ? 'tool' : 'tools')}
+                {showSavedOnly ? (lang === 'zh' ? '，已收藏' : ' saved') : ''}
+                {showRecentOnly ? (lang === 'zh' ? '，最近使用' : ' recent') : ''}
+                {activeCategory !== 'All' ? `${lang === 'zh' ? '，' : ' in '}${categoryName(lang, activeCategory)}` : ''}
+              </p>
+            </div>
           </div>
 
           <nav className="category-nav" aria-label="Filter tools by category">
@@ -298,6 +326,15 @@ function App() {
                 {t('category.saved')}
                 <span className="category-count">{savedIds.size}</span>
               </button>
+              <button
+                className={`category-button category-button--saved${showRecentOnly ? ' category-button--active' : ''}`}
+                type="button"
+                aria-pressed={showRecentOnly}
+                onClick={() => setShowRecentOnly((current) => !current)}
+              >
+                {t('category.recent')}
+                <span className="category-count">{recentIds.length}</span>
+              </button>
             </div>
           </nav>
 
@@ -309,9 +346,9 @@ function App() {
             </div>
           ) : (
             <div className="empty-state">
-              <span className="empty-icon" aria-hidden="true">{showSavedOnly ? '☆' : '?'}</span>
-              <h3>{showSavedOnly ? t('empty.savedTitle') : t('empty.searchTitle')}</h3>
-              <p>{showSavedOnly ? t('empty.savedBody') : t('empty.searchBody')}</p>
+              <span className="empty-icon" aria-hidden="true">{showSavedOnly ? '☆' : showRecentOnly ? '◷' : '?'}</span>
+              <h3>{showSavedOnly ? t('empty.savedTitle') : showRecentOnly ? t('empty.recentTitle') : t('empty.searchTitle')}</h3>
+              <p>{showSavedOnly ? t('empty.savedBody') : showRecentOnly ? t('empty.recentBody') : t('empty.searchBody')}</p>
               <button type="button" onClick={clearFilters}>{t('empty.clear')}</button>
             </div>
           )}
