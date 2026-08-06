@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { categories, tools, type Tool, type ToolCategory } from './data/tools';
 import { filterTools, readSavedToolIds, writeSavedToolIds } from './lib/toolkit';
 import { getRouteFromHash } from './lib/toolkit-tools';
+import { categoryName } from './lib/i18n';
+import { useLanguage } from './context/LanguageContext';
 import { Base64Encoder } from './components/tools/Base64Encoder';
 import { CaseConverter } from './components/tools/CaseConverter';
 import { ColorConverter } from './components/tools/ColorConverter';
@@ -41,12 +43,16 @@ function saveIds(ids: SavedIds): void {
 }
 
 function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boolean; onToggleSaved: (id: string) => void }) {
+  const { lang } = useLanguage();
+  const name = lang === 'zh' ? tool.nameZh ?? tool.name : tool.name;
+  const description = lang === 'zh' ? tool.descriptionZh ?? tool.description : tool.description;
+
   const details = (
     <>
-      <h3>{tool.name}</h3>
-      <p>{tool.description}</p>
+      <h3>{name}</h3>
+      <p>{description}</p>
       <div className="tool-card__meta">
-        <span className="category-label">{tool.category}</span>
+        <span className="category-label">{categoryName(lang, tool.category)}</span>
         <span className="tool-tags">{tool.tags.slice(0, 2).join(' / ')}</span>
       </div>
     </>
@@ -72,6 +78,7 @@ function ToolCard({ tool, isSaved, onToggleSaved }: { tool: Tool; isSaved: boole
 }
 
 function App() {
+  const { lang, t, toggleLang } = useLanguage();
   const [route, setRoute] = useState(() => getRouteFromHash(window.location.hash));
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>('All');
@@ -80,6 +87,10 @@ function App() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const categoryFiltered = filterTools(tools, query, activeCategory);
   const visibleTools = showSavedOnly ? categoryFiltered.filter((tool) => savedIds.has(tool.id)) : categoryFiltered;
+
+  useEffect(() => {
+    document.title = lang === 'zh' ? '工具箱 · 小工具，大能量。' : 'Toolkit. Small tools, big momentum.';
+  }, [lang]);
 
   useEffect(() => {
     const handleHashChange = () => setRoute(getRouteFromHash(window.location.hash));
@@ -204,21 +215,24 @@ function App() {
           TOOLKIT<span aria-hidden="true">.</span>
         </a>
         <nav className="site-nav" aria-label="Primary navigation">
-          <a href="#tool-directory">Browse tools</a>
-          <a href="#about">About</a>
-          <span className="saved-count" aria-label={`${savedIds.size} saved tools`}>
-            Saved <strong>{String(savedIds.size).padStart(2, '0')}</strong>
+          <a href="#tool-directory">{t('nav.browse')}</a>
+          <a href="#about">{t('nav.about')}</a>
+          <span className="saved-count" aria-label={`${savedIds.size} ${t('nav.saved')}`}>
+            {t('nav.saved')} <strong>{String(savedIds.size).padStart(2, '0')}</strong>
           </span>
+          <button className="lang-toggle" type="button" aria-label={t('lang.label')} onClick={toggleLang}>{t('lang.button')}</button>
         </nav>
       </header>
 
       <main>
         <section className="hero" aria-labelledby="page-title">
-          <p className="eyebrow"><span aria-hidden="true">/</span> A useful place to start</p>
-          <h1 id="page-title">Small tools,<br /><em>big momentum.</em></h1>
-          <p className="hero-copy">Useful utilities for the small frictions in your day.</p>
+          <p className="eyebrow"><span aria-hidden="true">/</span> {t('hero.eyebrow')}</p>
+          <h1 id="page-title">{t('hero.title').split('\n').map((line, index) => (
+            <span key={line} style={{ display: 'block' }}>{index === 1 ? <em>{line}</em> : line}</span>
+          ))}</h1>
+          <p className="hero-copy">{t('hero.subtitle')}</p>
           <div className="search-wrap">
-            <label htmlFor="tool-search">Search the collection</label>
+            <label htmlFor="tool-search">{t('search.label')}</label>
             <div className="search-field">
               <span className="search-mark" aria-hidden="true">⌕</span>
               <input
@@ -227,7 +241,7 @@ function App() {
                 ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search tools by name or category..."
+                placeholder={t('search.placeholder')}
               />
               <kbd>/</kbd>
             </div>
@@ -237,13 +251,13 @@ function App() {
         <section className="catalog" id="tool-directory" aria-labelledby="catalog-title">
           <div className="catalog-heading">
             <div>
-              <p className="section-kicker">The collection</p>
-              <h2 id="catalog-title">Find your next shortcut.</h2>
+              <p className="section-kicker">{t('section.kicker')}</p>
+              <h2 id="catalog-title">{t('section.title')}</h2>
             </div>
             <p className="result-summary" aria-live="polite">
-              {visibleTools.length} {visibleTools.length === 1 ? 'tool' : 'tools'}
-              {showSavedOnly ? ' saved' : ''}
-              {activeCategory !== 'All' ? ` in ${activeCategory}` : ''}
+              {visibleTools.length} {lang === 'zh' ? '个工具' : (visibleTools.length === 1 ? 'tool' : 'tools')}
+              {showSavedOnly ? (lang === 'zh' ? '，已收藏' : ' saved') : ''}
+              {activeCategory !== 'All' ? `${lang === 'zh' ? '，' : ' in '}${categoryName(lang, activeCategory)}` : ''}
             </p>
           </div>
 
@@ -257,7 +271,7 @@ function App() {
                   key={category}
                   onClick={() => setActiveCategory(category)}
                 >
-                  {category}
+                  {categoryName(lang, category)}
                   {category === 'All' && <span className="category-count">{tools.length}</span>}
                 </button>
               ))}
@@ -267,7 +281,7 @@ function App() {
                 aria-pressed={showSavedOnly}
                 onClick={() => setShowSavedOnly((current) => !current)}
               >
-                Saved
+                {t('category.saved')}
                 <span className="category-count">{savedIds.size}</span>
               </button>
             </div>
@@ -282,17 +296,17 @@ function App() {
           ) : (
             <div className="empty-state">
               <span className="empty-icon" aria-hidden="true">{showSavedOnly ? '☆' : '?'}</span>
-              <h3>{showSavedOnly ? 'Nothing saved yet.' : 'No tools match that search.'}</h3>
-              <p>{showSavedOnly ? 'Tap the star on any tool to keep it close.' : 'Try another phrase or browse the full collection.'}</p>
-              <button type="button" onClick={clearFilters}>Clear filters</button>
+              <h3>{showSavedOnly ? t('empty.savedTitle') : t('empty.searchTitle')}</h3>
+              <p>{showSavedOnly ? t('empty.savedBody') : t('empty.searchBody')}</p>
+              <button type="button" onClick={clearFilters}>{t('empty.clear')}</button>
             </div>
           )}
         </section>
       </main>
 
       <footer className="site-footer" id="footer">
-        <p id="about"><span aria-hidden="true">TOOLKIT.</span> A small collection for getting unstuck.</p>
-        <p>20 tools and counting <span aria-hidden="true">↗</span></p>
+        <p id="about"><span aria-hidden="true">{t('brand')}</span> {t('footer.left')}</p>
+        <p>{t('footer.right')} <span aria-hidden="true">↗</span></p>
       </footer>
     </div>
   );
