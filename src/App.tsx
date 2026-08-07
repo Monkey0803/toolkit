@@ -5,6 +5,7 @@ import { getRouteFromHash } from './lib/toolkit-tools';
 import { categoryName } from './lib/i18n';
 import { useLanguage } from './context/LanguageContext';
 import { useTheme } from './context/ThemeContext';
+import { BmiCalculator } from './components/tools/BmiCalculator';
 import { CaseConverter } from './components/tools/CaseConverter';
 import { ColorConverter } from './components/tools/ColorConverter';
 import { ContrastChecker } from './components/tools/ContrastChecker';
@@ -21,8 +22,15 @@ import { QrCodeMaker } from './components/tools/QrCodeMaker';
 import { RegexTester } from './components/tools/RegexTester';
 import { TimestampConverter } from './components/tools/TimestampConverter';
 import { TipCalculator } from './components/tools/TipCalculator';
-import { UnitConverter } from './components/tools/UnitConverter';
 import { UuidGenerator } from './components/tools/UuidGenerator';
+import { HashGenerator } from './components/tools/HashGenerator';
+import { ImageToBase64 } from './components/tools/ImageToBase64';
+import { JwtDecoder } from './components/tools/JwtDecoder';
+import { LineTools } from './components/tools/LineTools';
+import { LoanCalculator } from './components/tools/LoanCalculator';
+import { NumberBase } from './components/tools/NumberBase';
+import { TextDiff } from './components/tools/TextDiff';
+import { UnitConverter } from './components/tools/UnitConverter';
 import { WordCounter } from './components/tools/WordCounter';
 
 type ActiveCategory = 'All' | ToolCategory;
@@ -274,6 +282,38 @@ function App() {
 
   if (route === 'tools/date-difference') {
     return <DateDifference />;
+  }
+
+  if (route === 'tools/text-diff') {
+    return <TextDiff />;
+  }
+
+  if (route === 'tools/line-tools') {
+    return <LineTools />;
+  }
+
+  if (route === 'tools/image-to-base64') {
+    return <ImageToBase64 />;
+  }
+
+  if (route === 'tools/jwt-decoder') {
+    return <JwtDecoder />;
+  }
+
+  if (route === 'tools/hash-generator') {
+    return <HashGenerator />;
+  }
+
+  if (route === 'tools/number-base') {
+    return <NumberBase />;
+  }
+
+  if (route === 'tools/loan-calculator') {
+    return <LoanCalculator />;
+  }
+
+  if (route === 'tools/bmi-calculator') {
+    return <BmiCalculator />;
   }
 
   return (

@@ -1,24 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildGradient,
+  calculateBmi,
+  calculateLoan,
   calculatePercentage,
   contrastRatio,
+  convertBase,
   convertCase,
   convertEncoding,
   convertUnit,
   countWords,
   dateToUnix,
   daysBetween,
+  decodeJwt,
   decodeUrlComponent,
+  diffLines,
   encodeUrlComponent,
   generateLorem,
   generatePassword,
   generateUuids,
   getRouteFromHash,
+  hashText,
   parseHexColor,
   regexMatches,
   renderMarkdown,
   splitTip,
+  transformLines,
   unixToDate,
   wcagLevel,
   decodeBase64,
@@ -218,5 +225,70 @@ describe('encoding codecs', () => {
     expect(convertEncoding('base58', 'decode', convertEncoding('base58', 'encode', zh))).toBe(zh);
     expect(() => convertEncoding('base32', 'decode', '?!')).toThrow();
     expect(() => convertEncoding('utf8', 'decode', 'zz')).toThrow();
+  });
+});
+
+describe('JWT decoder', () => {
+  it('decodes header and payload without verification', () => {
+    const b64url = (value: string) => encodeBase64(value).replace(/=+$/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    const token = `${b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))}.${b64url(JSON.stringify({ sub: '123', name: '中文' }))}.sig`;
+    const { header, payload } = decodeJwt(token);
+    expect(JSON.parse(header).alg).toBe('HS256');
+    expect(JSON.parse(payload).name).toBe('中文');
+  });
+
+  it('rejects malformed tokens', () => {
+    expect(() => decodeJwt('not-a-token')).toThrow();
+  });
+});
+
+describe('hash generator', () => {
+  it('produces a known SHA-256 digest', async () => {
+    expect(await hashText('SHA-256', 'abc')).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  });
+});
+
+describe('text diff', () => {
+  it('flags added and removed lines', () => {
+    const result = diffLines('a\nb\nc', 'a\nx\nc');
+    const types = result.map((line) => `${line.type}:${line.text}`).join('|');
+    expect(types).toContain('removed:b');
+    expect(types).toContain('added:x');
+  });
+});
+
+describe('line tools', () => {
+  it('sorts, dedupes, and filters lines', () => {
+    const input = 'banana\napple\nbanana\n\n  cherry';
+    expect(transformLines(input, { sort: 'asc', unique: true, trim: true, removeEmpty: true, filter: '' })).toBe('apple\nbanana\ncherry');
+  });
+});
+
+describe('number base conversion', () => {
+  it('converts between bases with BigInt precision', () => {
+    expect(convertBase('255', 10, 16)).toBe('FF');
+    expect(convertBase('10', 10, 2)).toBe('1010');
+    expect(convertBase('FFFF', 16, 10)).toBe('65535');
+  });
+});
+
+describe('loan and BMI calculators', () => {
+  it('computes equal-payment loan', () => {
+    const plan = calculateLoan('equal-payment', 1000000, 4, 20);
+    expect(plan.monthlyPayment).toBeGreaterThan(0);
+    expect(plan.totalInterest).toBeGreaterThan(plan.monthlyPayment * 12 * 20 - 1000000 - 1);
+  });
+
+  it('computes equal-principal totals', () => {
+    const plan = calculateLoan('equal-principal', 1200000, 12, 10);
+    expect(plan.firstPayment).toBeGreaterThan(plan.lastPayment);
+    expect(plan.totalInterest).toBeGreaterThan(0);
+  });
+
+  it('classifies BMI', () => {
+    expect(calculateBmi(175, 45).category).toBe('underweight');
+    expect(calculateBmi(175, 70).category).toBe('normal');
+    expect(calculateBmi(175, 80).category).toBe('overweight');
+    expect(calculateBmi(170, 90).category).toBe('obese');
   });
 });

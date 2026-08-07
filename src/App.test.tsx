@@ -27,11 +27,11 @@ beforeEach(() => {
 });
 
 describe('directory', () => {
-  it('renders the hero, search, and all 19 tool cards', () => {
+  it('renders the hero, search, and all 27 tool cards', () => {
     renderApp();
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     expect(screen.getByRole('searchbox')).toBeInTheDocument();
-    expect(cardCount()).toBe(19);
+    expect(cardCount()).toBe(27);
   });
 
   it('filters tools by search query', () => {

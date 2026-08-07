@@ -399,6 +399,156 @@ export function convertEncoding(type: EncodingType, direction: EncodingDirection
   }
 }
 
+export function decodeJwt(token: string): { header: string; payload: string } {
+  const parts = token.trim().split('.');
+  if (parts.length !== 3) throw new Error('A JWT has three dot-separated parts.');
+
+  const decodePart = (value: string): string => {
+    const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+    const binary = atob(padded);
+    return new TextDecoder().decode(Uint8Array.from(binary, (character) => character.charCodeAt(0)));
+  };
+
+  const header = decodePart(parts[0]);
+  const payload = decodePart(parts[1]);
+  JSON.parse(header);
+  JSON.parse(payload);
+  return { header, payload };
+}
+
+export async function hashText(algorithm: 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512', text: string): Promise<string> {
+  const data = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest(algorithm, data);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+export type DiffLine = { type: 'same' | 'added' | 'removed'; text: string };
+
+export function diffLines(a: string, b: string): DiffLine[] {
+  const left = a.split('\n');
+  const right = b.split('\n');
+  const n = left.length;
+  const m = right.length;
+  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+
+  for (let i = n - 1; i >= 0; i -= 1) {
+    for (let j = m - 1; j >= 0; j -= 1) {
+      dp[i][j] = left[i] === right[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+
+  const output: DiffLine[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (left[i] === right[j]) {
+      output.push({ type: 'same', text: left[i] });
+      i += 1;
+      j += 1;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      output.push({ type: 'removed', text: left[i] });
+      i += 1;
+    } else {
+      output.push({ type: 'added', text: right[j] });
+      j += 1;
+    }
+  }
+  while (i < n) output.push({ type: 'removed', text: left[i++] });
+  while (j < m) output.push({ type: 'added', text: right[j++] });
+  return output;
+}
+
+export type LineOptions = {
+  sort: 'none' | 'asc' | 'desc';
+  unique: boolean;
+  trim: boolean;
+  removeEmpty: boolean;
+  filter: string;
+};
+
+export function transformLines(text: string, options: LineOptions): string {
+  let lines = text.split('\n');
+  if (options.trim) lines = lines.map((line) => line.trim());
+  if (options.removeEmpty) lines = lines.filter((line) => line.length > 0);
+  if (options.unique) lines = [...new Set(lines)];
+  if (options.sort !== 'none') lines = lines.sort((a, b) => (options.sort === 'asc' ? a.localeCompare(b) : b.localeCompare(a)));
+  if (options.filter) lines = lines.filter((line) => line.includes(options.filter));
+  return lines.join('\n');
+}
+
+export function convertBase(value: string, fromBase: number, toBase: number): string {
+  const digits = value.trim().toUpperCase();
+  if (!digits) return '';
+  const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let number = 0n;
+
+  for (const character of digits) {
+    const digit = alphabet.indexOf(character);
+    if (digit < 0 || digit >= fromBase) throw new Error('Invalid digit for the selected base.');
+    number = number * BigInt(fromBase) + BigInt(digit);
+  }
+
+  if (number === 0n) return '0';
+  let output = '';
+  while (number > 0n) {
+    output = alphabet[Number(number % BigInt(toBase))] + output;
+    number /= BigInt(toBase);
+  }
+  return output;
+}
+
+export type LoanPlan = {
+  monthlyPayment: number;
+  totalInterest: number;
+  firstPayment: number;
+  lastPayment: number;
+};
+
+export function calculateLoan(type: 'equal-payment' | 'equal-principal', principal: number, annualRatePercent: number, years: number): LoanPlan {
+  if (principal <= 0 || years <= 0) return { monthlyPayment: 0, totalInterest: 0, firstPayment: 0, lastPayment: 0 };
+
+  const monthlyRate = annualRatePercent / 100 / 12;
+  const months = years * 12;
+
+  if (type === 'equal-payment') {
+    const factor = Math.pow(1 + monthlyRate, months);
+    const monthlyPayment = principal * monthlyRate * factor / (factor - 1);
+    return {
+      monthlyPayment: round2(monthlyPayment),
+      totalInterest: round2(monthlyPayment * months - principal),
+      firstPayment: round2(monthlyPayment),
+      lastPayment: round2(monthlyPayment),
+    };
+  }
+
+  const monthlyPrincipal = principal / months;
+  const firstPayment = monthlyPrincipal + principal * monthlyRate;
+  const lastPayment = monthlyPrincipal + monthlyPrincipal * monthlyRate;
+  return {
+    monthlyPayment: round2(firstPayment),
+    totalInterest: round2(principal * monthlyRate * (months + 1) / 2),
+    firstPayment: round2(firstPayment),
+    lastPayment: round2(lastPayment),
+  };
+}
+
+export function calculateBmi(heightCm: number, weightKg: number): { bmi: number; category: 'underweight' | 'normal' | 'overweight' | 'obese' } {
+  const heightM = heightCm / 100;
+  if (heightM <= 0 || weightKg <= 0) return { bmi: 0, category: 'normal' };
+  const bmi = weightKg / (heightM * heightM);
+  const category = bmi < 18.5 ? 'underweight' : bmi < 24 ? 'normal' : bmi < 28 ? 'overweight' : 'obese';
+  return { bmi: round1(bmi), category };
+}
+
+function round2(value: number): number {
+  return Number(value.toFixed(2));
+}
+
+function round1(value: number): number {
+  return Number(value.toFixed(1));
+}
+
 export function unixToDate(value: string, unit: 'seconds' | 'milliseconds'): string {
   const number = Number(value.trim());
   if (!Number.isFinite(number)) throw new Error('Enter a numeric timestamp.');
