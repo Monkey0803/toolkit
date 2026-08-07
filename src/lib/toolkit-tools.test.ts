@@ -4,6 +4,7 @@ import {
   calculatePercentage,
   contrastRatio,
   convertCase,
+  convertEncoding,
   convertUnit,
   countWords,
   dateToUnix,
@@ -22,6 +23,16 @@ import {
   wcagLevel,
   decodeBase64,
   encodeBase64,
+  decodeBase32,
+  encodeBase32,
+  decodeBase58,
+  encodeBase58,
+  decodeBase16,
+  encodeBase16,
+  decodeUnicode,
+  encodeUnicode,
+  decodeUtf8Hex,
+  encodeUtf8Hex,
   formatJson,
 } from './toolkit-tools';
 
@@ -177,5 +188,35 @@ describe('everyday helpers', () => {
 
   it('generates lorem paragraphs', () => {
     expect(generateLorem(2).split('\n\n')).toHaveLength(2);
+  });
+});
+
+describe('encoding codecs', () => {
+  const zh = '工具箱 Toolkit';
+
+  it('round-trips Base32 and Base58', () => {
+    expect(decodeBase32(encodeBase32(zh))).toBe(zh);
+    expect(decodeBase58(encodeBase58(zh))).toBe(zh);
+  });
+
+  it('round-trips Base16 and Unicode escapes', () => {
+    expect(decodeBase16(encodeBase16(zh))).toBe(zh);
+    expect(decodeUnicode(encodeUnicode(zh))).toBe(zh);
+    expect(encodeUnicode('中')).toBe('\\u4e2d');
+  });
+
+  it('round-trips UTF-8 hex bytes for Chinese', () => {
+    expect(encodeUtf8Hex('中')).toBe('E4 B8 AD');
+    expect(decodeUtf8Hex('E4 B8 AD')).toBe('中');
+    expect(decodeUtf8Hex('%E4%B8%AD')).toBe('中');
+    expect(decodeUtf8Hex('\\xE4\\xB8\\xAD')).toBe('中');
+  });
+
+  it('routes every type through convertEncoding', () => {
+    expect(convertEncoding('base32', 'decode', convertEncoding('base32', 'encode', zh))).toBe(zh);
+    expect(convertEncoding('utf8', 'decode', convertEncoding('utf8', 'encode', zh))).toBe(zh);
+    expect(convertEncoding('base58', 'decode', convertEncoding('base58', 'encode', zh))).toBe(zh);
+    expect(() => convertEncoding('base32', 'decode', '?!')).toThrow();
+    expect(() => convertEncoding('utf8', 'decode', 'zz')).toThrow();
   });
 });

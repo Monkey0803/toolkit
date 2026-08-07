@@ -250,6 +250,155 @@ export function decodeUrlComponent(value: string): string {
   return decodeURIComponent(value.replace(/\+/g, ' '));
 }
 
+export type EncodingType = 'base64' | 'base32' | 'base58' | 'base16' | 'url' | 'unicode' | 'utf8';
+export type EncodingDirection = 'encode' | 'decode';
+
+const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+export function encodeBase32(input: string): string {
+  const bytes = new TextEncoder().encode(input);
+  let bits = 0;
+  let value = 0;
+  let output = '';
+
+  for (const byte of bytes) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      output += BASE32_ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+
+  if (bits > 0) {
+    output += BASE32_ALPHABET[(value << (5 - bits)) & 31];
+  }
+
+  const padding = '='.repeat((8 - (output.length % 8)) % 8);
+  return output + padding;
+}
+
+export function decodeBase32(input: string): string {
+  const clean = input.trim().toUpperCase().replace(/=+$/, '').replace(/\s+/g, '');
+  const bytes: number[] = [];
+  let bits = 0;
+  let value = 0;
+
+  for (const char of clean) {
+    const index = BASE32_ALPHABET.indexOf(char);
+    if (index === -1) throw new Error('Invalid Base32 input.');
+    value = (value << 5) | index;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+
+  return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
+export function encodeBase58(input: string): string {
+  const bytes = new TextEncoder().encode(input);
+  if (bytes.length === 0) return '';
+  let number = 0n;
+  for (const byte of bytes) number = (number << 8n) | BigInt(byte);
+
+  let output = '';
+  while (number > 0n) {
+    output = BASE58_ALPHABET[Number(number % 58n)] + output;
+    number /= 58n;
+  }
+
+  let zeros = 0;
+  for (const byte of bytes) {
+    if (byte !== 0) break;
+    zeros += 1;
+  }
+  return '1'.repeat(zeros) + output;
+}
+
+export function decodeBase58(input: string): string {
+  const clean = input.trim();
+  if (!clean) return '';
+  let number = 0n;
+  for (const char of clean) {
+    const index = BASE58_ALPHABET.indexOf(char);
+    if (index === -1) throw new Error('Invalid Base58 input.');
+    number = number * 58n + BigInt(index);
+  }
+
+  const bytes: number[] = [];
+  while (number > 0n) {
+    bytes.unshift(Number(number & 0xffn));
+    number >>= 8n;
+  }
+
+  const zeros = clean.match(/^1*/)?.[0].length ?? 0;
+  return new TextDecoder().decode(new Uint8Array([...new Array<number>(zeros).fill(0), ...bytes]));
+}
+
+export function encodeBase16(input: string): string {
+  const bytes = new TextEncoder().encode(input);
+  return [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
+}
+
+export function decodeBase16(input: string): string {
+  const clean = input.trim().replace(/\s+/g, '').replace(/\\x/gi, '');
+  if (clean.length % 2 !== 0 || !/^[\da-f]+$/i.test(clean)) throw new Error('Invalid hex input.');
+  const bytes = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < bytes.length; i += 1) bytes[i] = Number.parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+  return new TextDecoder().decode(bytes);
+}
+
+export function encodeUnicode(input: string): string {
+  let output = '';
+  for (const char of input) {
+    const code = char.charCodeAt(0);
+    output += `\\u${code.toString(16).padStart(4, '0')}`;
+  }
+  return output;
+}
+
+export function decodeUnicode(input: string): string {
+  return input
+    .replace(/\\u\{([\da-f]+)\}/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/\\u([\da-f]{4})/gi, (_, hex) => String.fromCharCode(Number.parseInt(hex, 16)));
+}
+
+export function encodeUtf8Hex(input: string): string {
+  return encodeBase16(input);
+}
+
+export function decodeUtf8Hex(input: string): string {
+  const clean = input.trim().replace(/%/g, '\\x').replace(/\\x\s*/gi, '').replace(/\s+/g, '');
+  if (clean.length % 2 !== 0 || !/^[\da-f]+$/i.test(clean)) throw new Error('Invalid UTF-8 byte input.');
+  const bytes = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < bytes.length; i += 1) bytes[i] = Number.parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+  return new TextDecoder().decode(bytes);
+}
+
+export function convertEncoding(type: EncodingType, direction: EncodingDirection, input: string): string {
+  if (!input) return '';
+  switch (type) {
+    case 'base64':
+      return direction === 'encode' ? encodeBase64(input) : decodeBase64(input);
+    case 'base32':
+      return direction === 'encode' ? encodeBase32(input) : decodeBase32(input);
+    case 'base58':
+      return direction === 'encode' ? encodeBase58(input) : decodeBase58(input);
+    case 'base16':
+      return direction === 'encode' ? encodeBase16(input) : decodeBase16(input);
+    case 'url':
+      return direction === 'encode' ? encodeUrlComponent(input) : decodeUrlComponent(input);
+    case 'unicode':
+      return direction === 'encode' ? encodeUnicode(input) : decodeUnicode(input);
+    case 'utf8':
+      return direction === 'encode' ? encodeUtf8Hex(input) : decodeUtf8Hex(input);
+  }
+}
+
 export function unixToDate(value: string, unit: 'seconds' | 'milliseconds'): string {
   const number = Number(value.trim());
   if (!Number.isFinite(number)) throw new Error('Enter a numeric timestamp.');

@@ -5,11 +5,11 @@ import { getRouteFromHash } from './lib/toolkit-tools';
 import { categoryName } from './lib/i18n';
 import { useLanguage } from './context/LanguageContext';
 import { useTheme } from './context/ThemeContext';
-import { Base64Encoder } from './components/tools/Base64Encoder';
 import { CaseConverter } from './components/tools/CaseConverter';
 import { ColorConverter } from './components/tools/ColorConverter';
 import { ContrastChecker } from './components/tools/ContrastChecker';
 import { DateDifference } from './components/tools/DateDifference';
+import { EncodingConverter } from './components/tools/EncodingConverter';
 import { GradientGenerator } from './components/tools/GradientGenerator';
 import { JsonFormatter } from './components/tools/JsonFormatter';
 import { ImageResizer } from './components/tools/ImageResizer';
@@ -22,7 +22,6 @@ import { RegexTester } from './components/tools/RegexTester';
 import { TimestampConverter } from './components/tools/TimestampConverter';
 import { TipCalculator } from './components/tools/TipCalculator';
 import { UnitConverter } from './components/tools/UnitConverter';
-import { UrlEncoder } from './components/tools/UrlEncoder';
 import { UuidGenerator } from './components/tools/UuidGenerator';
 import { WordCounter } from './components/tools/WordCounter';
 
@@ -217,12 +216,8 @@ function App() {
     return <MarkdownPreviewer />;
   }
 
-  if (route === 'tools/base64-encoder') {
-    return <Base64Encoder />;
-  }
-
-  if (route === 'tools/url-encoder') {
-    return <UrlEncoder />;
+  if (route === 'tools/encoding-converter') {
+    return <EncodingConverter />;
   }
 
   if (route === 'tools/timestamp-converter') {
