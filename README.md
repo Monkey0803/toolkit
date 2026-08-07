@@ -14,9 +14,9 @@
 ## 技术栈
 
 - Vite + React + TypeScript
-- Vitest（纯函数测试）
+- Vitest（纯函数测试 + Testing Library 组件测试）
 - Hash 路由（`#/tools/<route>`，无需服务器重写规则）
-- 唯一第三方运行依赖：`qrcode`（二维码生成）
+- 唯一第三方运行依赖：`qrcode-generator`（二维码生成）
 
 ## 快速开始
 
@@ -36,7 +36,19 @@ npm run test:dist # 构建并校验 dist/index.html 可自包含打开
 
 ### GitHub Pages
 
-仓库已内置 `.github/workflows/deploy-pages.yml`。推送到 `main` 后自动构建并部署。首次使用需在仓库 Settings → Pages 将 Source 设为 **GitHub Actions**。
+当前站点地址：`https://<用户名>.github.io/<仓库名>/`
+
+仓库内置 `.github/workflows/deploy-pages.yml`，推送到 `main` 后自动构建并把 `dist/` 发布到 `gh-pages` 分支。首次使用需在仓库 **Settings → Pages** 将 Source 设为 **Deploy from a branch**，分支选 `gh-pages`、目录 `/ (root)`。
+
+#### 部署排错记录（踩过的坑）
+
+1. **GH007 邮箱隐私拦截推送**：本地 `git config user.email` 若用了私密邮箱，GitHub 会拒绝 `git push`（`GH007: push would publish a private email address`）。解决：
+   - 在 `github.com/settings/emails` 关闭「Block command line pushes that expose my email」，或
+   - 改用 GitHub 提供的 noreply 邮箱（`<ID>+<用户名>@users.noreply.github.com`，ID 可用 `gh api user --jq .id` 查询），并用 `git filter-branch --env-filter` 重写已有提交的作者/提交者邮箱后重新推送。
+
+2. **`actions/deploy-pages@v4` 部署被反复取消**：新仓库首次用 GitHub Actions 方式（`build_type: workflow`）部署时，Pages 后端可能留下卡住的部署记录，之后每次 `deploy-pages` 都报 `Deployment cancelled` 且复用同一个 `pages_build_version`。重建设站（删除再 `POST /repos/<owner>/<repo>/pages`）也无法清空。解决：改用 `peaceiris/actions-gh-pages` 把 `dist/` 直接推到 `gh-pages` 分支，并让 Pages 从分支托管（`build_type: legacy`）。该方式稳定可靠，本仓库当前采用此方案。
+
+3. **首次部署需要几分钟**：Pages 从 `gh-pages` 分支构建到对外可访问通常需要 1~3 分钟，`curl` 返回 404 属正常，稍等后即变为 200。
 
 ### Vercel
 
